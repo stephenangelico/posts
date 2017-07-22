@@ -27,6 +27,16 @@ class TestAPI(unittest.TestCase):
 		# Remove the tables and their data from the database
 		Base.metadata.drop_all(engine)
 	
+	def create_multiple_posts(self):
+		""" Create multiple posts for tests """
+		#TODO: maybe make one for a single test post? Only if needed
+		postA = models.Post(title="Post with bells", body="Nobody expects")
+		postB = models.Post(title="Post with whistles", body="Still a test")
+		postC = models.Post(title="Post with bells and whistles", body="Nobody expects the Spanish Inquisition!")
+		
+		session.add_all([postA, postB, postC])
+		session.commit()
+	
 	def test_get_empty_posts(self):
 		""" Getting posts from an empty database """
 		response = self.client.get("/api/posts",
@@ -41,6 +51,7 @@ class TestAPI(unittest.TestCase):
 	
 	def test_get_posts(self):
 		""" Getting posts from a populated database """
+		#TODO: use self.create_multiple_posts() and adjust assertEquals
 		postA = models.Post(title="Example Post A", body="Just a test")
 		postB = models.Post(title="Example Post B", body="Still a test")
 		
@@ -67,6 +78,7 @@ class TestAPI(unittest.TestCase):
 	
 	def test_get_post(self):
 		""" Getting a single post from a populated database """
+		#TODO: same as test_get_posts()
 		postA = models.Post(title="Example Post A", body="Just a test")
 		postB = models.Post(title="Example Post B", body="Still a test")
 		
@@ -111,6 +123,7 @@ class TestAPI(unittest.TestCase):
 	
 	def test_delete_post(self):
 		""" Deleting a post """
+		#TODO: see create_multiple_posts()
 		postA = models.Post(title="Example Post A", body="Just a test")
 		
 		session.add(postA)
@@ -131,12 +144,7 @@ class TestAPI(unittest.TestCase):
 	
 	def test_get_posts_with_title(self):
 		""" Filtering posts by title """
-		postA = models.Post(title="Post with bells", body="Just a test")
-		postB = models.Post(title="Post with whistles", body="Still a test")
-		postC = models.Post(title="Post with bells and whistles", body="Another test")
-		
-		session.add_all([postA, postB, postC])
-		session.commit()
+		self.create_multiple_posts()
 		
 		response = self.client.get("/api/posts?title_like=whistles",
 			headers=[("Accept", "application/json")]
@@ -154,7 +162,7 @@ class TestAPI(unittest.TestCase):
 		
 		post = posts[1]
 		self.assertEqual(post["title"], "Post with bells and whistles")
-		self.assertEqual(post["body"], "Another test")
+		self.assertEqual(post["body"], "Nobody expects the Spanish Inquisition!")
 	
 
 if __name__ == "__main__":
