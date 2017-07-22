@@ -164,6 +164,22 @@ class TestAPI(unittest.TestCase):
 		self.assertEqual(post["title"], "Post with bells and whistles")
 		self.assertEqual(post["body"], "Nobody expects the Spanish Inquisition!")
 	
+	def test_get_posts_with_body(self):
+		""" Filtering posts by body """
+		self.create_multiple_posts()
+		response = self.client.get("/api/posts?title_like=whistles&body_like=expects",
+			headers=[("Accept", "application/json")]
+		)
+		
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(response.mimetype, "application/json")
+		
+		posts = json.loads(response.data.decode("ascii"))
+		self.assertEqual(len(posts), 1)
+		
+		post = posts[0]
+		self.assertEqual(post["title"], "Post with bells and whistles")
+		self.assertEqual(post["body"], "Nobody expects the Spanish Inquisition!")
 
 if __name__ == "__main__":
 	unittest.main()
