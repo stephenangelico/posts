@@ -261,6 +261,31 @@ class TestAPI(unittest.TestCase):
 		data = json.loads(response.data.decode("ascii"))
 		self.assertEqual(data["message"], "'body' is a required property")
 	
+	def test_edit_post(self):
+		""" Editing a post """
+		self.create_multiple_posts()
+		data = {
+			"title": "Post with a bell",
+			"body": "Nobody understands"
+		}
+		
+		response = self.client.put("/api/posts/1",
+			data=json.dumps(data),
+			content_type="application/json",
+			headers=[("Accept", "application/json")]
+		)
+		
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(response.mimetype, "application/json")
+		self.assertEqual(urlparse(response.headers.get("Location")).path,
+					"/api/posts/1")
+		
+		data = json.loads(response.data.decode("ascii"))
+		self.assertEqual(data["content"]["id"], 1)
+		self.assertEqual(data["content"]["title"], "Post with a bell")
+		self.assertEqual(data["content"]["body"], "Nobody understands")
+		self.assertEqual(data["message"],
+				"Post #1 successfully updated")
 
 if __name__ == "__main__":
 	unittest.main()

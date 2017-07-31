@@ -102,3 +102,43 @@ def posts_post():
 	headers = {"Location": url_for("post_get", id=post.id)}
 	return Response(data, 201, headers=headers,
 			mimetype="application/json")
+
+@app.route("/api/posts/<int:id>", methods=["PUT"])
+@decorators.accept("application/json")
+@decorators.require("application/json")
+def edit_post(id):
+	""" Edit an existing post """
+	data = request.json
+	
+	# Check that the JSON supplied is valid
+	# If not you return a 422 Unprocessable Entity
+	try:
+		validate(data, post_schema)
+	except ValidationError as error:
+		data = {"message": error.message}
+		return Response(json.dumps(data), 422, mimetype="application/json")
+	
+	# Get the post from the database
+	post = session.query(models.Post).get(id)
+	
+	# Check whether the post exists
+	# If not return a 404 with a helpful message
+	if not post:
+		message = "Could not find post with id {}".format(id)
+		data = json.dumps({"message": message})
+		return Response(data, 404, mimetype="application/json")
+	
+	# Update the post in the database
+	post.title=data["title"]
+	post.body=data["body"]
+	session.commit()
+	
+	# Return 200 OK (since that seems to be the best response), returning
+	# the post (same as with creation) with an "Update successful" message
+	# Note this is inconsistent with other post return formats - Don't do this!
+	message = "Post #{} successfully updated".format(id)
+	content = post.as_dictionary()
+	data = json.dumps({"message": message, "content" : content})
+	headers = {"Location": url_for("post_get", id=post.id)}
+	return Response(data, 200, headers=headers,
+			mimetype="application/json")
