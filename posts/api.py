@@ -70,6 +70,7 @@ def post_delete(id):
 		return Response(data, 404, mimetype="application/json")
 	
 	session.delete(post)
+	session.commit()
 	
 	# Confirm deletion by response
 	message = "Post #{} successfully deleted".format(id)
