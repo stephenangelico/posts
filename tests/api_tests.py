@@ -4,7 +4,7 @@ import json
 try: from urllib.parse import urlparse
 except ImportError: from urlparse import urlparse # Python 2 compatibility
 
-# Configure our app to use the testing databse
+# Configure our app to use the testing database
 os.environ["CONFIG_PATH"] = "posts.config.TestingConfig"
 
 from posts import app
